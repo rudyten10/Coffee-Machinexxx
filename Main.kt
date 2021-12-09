@@ -1,74 +1,49 @@
 package machine
 
-// Stage 3/6: Estimate the number of servings
+// Stage 4/6: Buy, fill, take_
 fun main() {
-//   println("Starting to make a coffee")
-//   println("Grinding coffee beans")
-//   println("Boiling water")
-//   println("Mixing boiled water with crushed coffee beans")
-//   println("Pouring coffee into the cup")
-//   println("Pouring some milk into the cup")
-//   println("Coffee is ready!")
+   var waterQty = 400
+   var milkQty = 540
+   var beansQty = 120
+   var cupQty = 9
+   var moneyQty = 550
 
+   printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
 
+   println("Write action (buy, fill, take:")
+   val action = readLine()!!
 
-   println("Write how many ml of water the coffee machine has:")
-   val water = readLine()!!.toInt()
-   println("Write how many ml of milk the coffee machine has:")
-   val milk = readLine()!!.toInt()
-   println("Write how many grams of coffee beans the coffee machine has:")
-   val beans = readLine()!!.toInt()
+   if (action == "buy") {
+      println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:")
+      val type = readLine()!!.toInt()
+      val supplies = updateSupplies(type, waterQty, milkQty, beansQty, cupQty, moneyQty)
+      waterQty = supplies[0]
+      milkQty = supplies[1]
+      beansQty = supplies[2]
+      cupQty = supplies[3]
+      moneyQty = supplies[4]
 
-   println("Write how many cups of coffee you will need:")
-   val cups = readLine()!!.toInt()
-
-   calcCoffeeCupsPossible(cups, water, milk, beans)
-
-
-//   val list = calcIngredientsQty(cups)
-//
-//   println("For $cups cups of coffee you will need:")
-//   println("${list[0]} ml of water") // water
-//   println("${list[1]} ml of milk") // milk
-//   println("${list[2]} g of coffee beans") // beans
-}
-
-
-fun calcCoffeeCupsPossible (cups: Int, water: Int, milk: Int, beans: Int) {
-   val baseWater = 200 // ml
-   val baseMilk = 50 // ml
-   val baseBeans = 15 // g
-
-   var inCups = 1
-   if (cups == 0)
-      inCups = 1
-   else
-      inCups = cups
-   val needWater = baseWater * inCups
-   val needMilk = baseMilk * inCups
-   val needBeans = baseBeans * inCups
-
-   var yes = false
-   var totalCups = 1
-   while (true) {
-      if (baseWater*totalCups <= water && baseMilk*totalCups <= milk && baseBeans*totalCups <= beans) {
-         ++totalCups
-      } else {
-         break
-      }
    }
-   totalCups--
+   if (action == "fill") {
+      println("Write how many ml of water do you want to add:") // > 2000
+      waterQty += readLine()!!.toInt()
 
-   if (totalCups > 0)
-      yes = true
+      println("Write how many ml of milk do you want to add:") //  > 500
+      milkQty += readLine()!!.toInt()
 
-   if (totalCups == cups) {
-      println("Yes, I can make that amount of coffee")
-   } else if (totalCups < cups) {
-      println("No, I can make only ${totalCups} cups of coffee")
-   } else {
-      println("Yes, I can make that amount of coffee (and even ${totalCups - cups} more than that)")
+      println("Write how many grams of coffee beans do you want to add:") // > 100
+      beansQty += readLine()!!.toInt()
+
+      println("Write how many disposable cups of coffee do you want to add:") //  > 10
+      cupQty += readLine()!!.toInt()
    }
+   if (action == "take") {
+      val money = moneyQty
+      println("I gave you: $money")
+      moneyQty = takeAllMoney(moneyQty)
+   }
+
+   printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
 }
 
 
@@ -77,8 +52,56 @@ fun calcIngredientsQty(cups: Int = 1): List<Int>{
    val milk = 50 // ml
    val coffeeBeans = 15 // g
 
-
    val list = listOf(water*cups, milk*cups, coffeeBeans*cups)
 
    return list
+}
+
+
+fun printSupplies(waterQty: Int, milkQty: Int, beansQty: Int, cupQty: Int, money: Int) {
+   println("The coffee machine has:")
+   println("$waterQty of water")
+   println("$milkQty of milk")
+   println("$beansQty of coffee beans")
+   println("$cupQty of disposable cups")
+   println("$money of money")
+}
+
+
+fun takeAllMoney(moneyQty: Int): Int {
+   return 0
+}
+
+
+fun updateSupplies (type: Int, waterQty: Int, milkQty: Int, beansQty: Int, cupQty: Int, moneyQty: Int): MutableList<Int> {
+   var baseWater = 0
+   var baseMilk = 0
+   var baseBeans = 0
+   var baseCupQty = 1
+   var baseMoneyQty = 0
+
+   if (type == 1) { // 1 is expresso
+      baseWater = 250 // ml
+      baseMilk = 0 // ml
+      baseBeans = 16 // g
+      baseMoneyQty = 4
+   } else if (type == 2) { // 2 is latte
+      baseWater = 350 // ml
+      baseMilk = 75 // ml
+      baseBeans = 20 // g
+      baseMoneyQty = 7
+   } else { // 3 is cappuccino
+      baseWater = 200 // ml
+      baseMilk = 100 // ml
+      baseBeans = 12 // g
+      baseMoneyQty = 6
+   }
+
+   var newWaterQty = waterQty - baseWater
+   var newMilkQty = milkQty - baseMilk
+   var newBeansQty = beansQty - baseBeans
+   var newCupQty = cupQty - baseCupQty
+   var newMoneyQty = moneyQty + baseMoneyQty
+
+   return mutableListOf<Int>(newWaterQty, newMilkQty, newBeansQty, newCupQty, newMoneyQty)
 }
