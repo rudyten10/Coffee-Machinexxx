@@ -1,6 +1,6 @@
 package machine
 
-// Stage 4/6: Buy, fill, take_
+// Stage 5/6: Keep track of the supplies
 fun main() {
    var waterQty = 400
    var milkQty = 540
@@ -8,42 +8,64 @@ fun main() {
    var cupQty = 9
    var moneyQty = 550
 
-   printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
 
-   println("Write action (buy, fill, take:")
-   val action = readLine()!!
+   while (true) {
+      println("Write action (buy, fill, take, remaining, exit):")
+      val action = readLine()!!
 
-   if (action == "buy") {
-      println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:")
-      val type = readLine()!!.toInt()
-      val supplies = updateSupplies(type, waterQty, milkQty, beansQty, cupQty, moneyQty)
-      waterQty = supplies[0]
-      milkQty = supplies[1]
-      beansQty = supplies[2]
-      cupQty = supplies[3]
-      moneyQty = supplies[4]
+      if (action == "exit") {
+         break
+      }
 
+      if (action == "remaining") {
+         printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
+      }
+
+      if (action == "buy") {
+         buyLoop@while (true) {
+            println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:")
+            val type = readLine()!!
+
+            if (type == "back") {
+               break@buyLoop
+            }
+
+            val msg = checkSupplies(type.toInt(), waterQty, milkQty, beansQty, cupQty, moneyQty)
+            if (msg == "") {
+               val supplies = updateSupplies(type.toInt(), waterQty, milkQty, beansQty, cupQty, moneyQty)
+               waterQty = supplies[0]
+               milkQty = supplies[1]
+               beansQty = supplies[2]
+               cupQty = supplies[3]
+               moneyQty = supplies[4]
+            } else {
+               println(msg)
+            }
+            break@buyLoop
+         }
+      }
+
+      if (action == "fill") {
+         println("Write how many ml of water do you want to add:") // > 2000
+         waterQty += readLine()!!.toInt()
+
+         println("Write how many ml of milk do you want to add:") //  > 500
+         milkQty += readLine()!!.toInt()
+
+         println("Write how many grams of coffee beans do you want to add:") // > 100
+         beansQty += readLine()!!.toInt()
+
+         println("Write how many disposable cups of coffee do you want to add:") //  > 10
+         cupQty += readLine()!!.toInt()
+      }
+      if (action == "take") {
+         val money = moneyQty
+         println("I gave you: $money")
+         moneyQty = takeAllMoney(moneyQty)
+      }
+
+      //printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
    }
-   if (action == "fill") {
-      println("Write how many ml of water do you want to add:") // > 2000
-      waterQty += readLine()!!.toInt()
-
-      println("Write how many ml of milk do you want to add:") //  > 500
-      milkQty += readLine()!!.toInt()
-
-      println("Write how many grams of coffee beans do you want to add:") // > 100
-      beansQty += readLine()!!.toInt()
-
-      println("Write how many disposable cups of coffee do you want to add:") //  > 10
-      cupQty += readLine()!!.toInt()
-   }
-   if (action == "take") {
-      val money = moneyQty
-      println("I gave you: $money")
-      moneyQty = takeAllMoney(moneyQty)
-   }
-
-   printSupplies(waterQty, milkQty, beansQty, cupQty, moneyQty)
 }
 
 
@@ -104,4 +126,45 @@ fun updateSupplies (type: Int, waterQty: Int, milkQty: Int, beansQty: Int, cupQt
    var newMoneyQty = moneyQty + baseMoneyQty
 
    return mutableListOf<Int>(newWaterQty, newMilkQty, newBeansQty, newCupQty, newMoneyQty)
+}
+
+
+fun checkSupplies (type: Int, waterQty: Int, milkQty: Int, beansQty: Int, cupQty: Int, moneyQty: Int): String {
+   var baseWater = 0
+   var baseMilk = 0
+   var baseBeans = 0
+   var baseCup = 1
+   var baseMoney = 0
+
+   if (type == 1) { // 1 is expresso
+      baseWater = 250 // ml
+      baseMilk = 0 // ml
+      baseBeans = 16 // g
+      baseMoney = 4
+   } else if (type == 2) { // 2 is latte
+      baseWater = 350 // ml
+      baseMilk = 75 // ml
+      baseBeans = 20 // g
+      baseMoney = 7
+   } else { // 3 is cappuccino
+      baseWater = 200 // ml
+      baseMilk = 100 // ml
+      baseBeans = 12 // g
+      baseMoney = 6
+   }
+
+   var msg = ""
+   if (waterQty < baseWater) {
+      msg = "Sorry, not enough water!"
+   }
+   if (milkQty < baseMilk) {
+      msg = "Sorry, not enough milk!"
+   }
+   if (beansQty < baseBeans) {
+      msg = "Sorry, not enough coffee beans!"
+   }
+   if (cupQty < baseCup) {
+      msg = "Sorry, not enough cups!"
+   }
+   return msg
 }
